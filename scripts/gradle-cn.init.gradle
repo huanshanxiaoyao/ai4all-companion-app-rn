@@ -1,0 +1,29 @@
+// Optional Gradle init script for networks where Google Maven is unreliable.
+// From the repository root:
+// ./android/gradlew -p android -I "$PWD/scripts/gradle-cn.init.gradle" <task>
+
+def addChinaMirrors = { repositories ->
+    repositories.maven { url = uri('https://maven.aliyun.com/repository/google') }
+    repositories.maven { url = uri('https://maven.aliyun.com/repository/central') }
+    repositories.maven { url = uri('https://maven.aliyun.com/repository/gradle-plugin') }
+}
+
+settingsEvaluated { settings ->
+    settings.pluginManagement.repositories { repositories ->
+        addChinaMirrors(repositories)
+    }
+
+    settings.dependencyResolutionManagement.repositories { repositories ->
+        addChinaMirrors(repositories)
+    }
+}
+
+allprojects { project ->
+    project.buildscript.repositories { repositories ->
+        addChinaMirrors(repositories)
+    }
+
+    project.repositories { repositories ->
+        addChinaMirrors(repositories)
+    }
+}

@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+.expo-shared/
+.expo-home/
+.gradle-local/
+dist/
+web-build/
+coverage/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# Generated native build artifacts remain local until the prebuild config is frozen.
+ios/
+android/

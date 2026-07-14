@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "朝夕相伴",
+    "slug": "ai4all-companion",
+    "version": "0.1.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F9F5EE"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ai4all.companion",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "用于把你的语音转成文字，录音不会作为聊天语音长期保存。",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.ai4all.companion",
+      "versionCode": 4,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F9F5EE"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "用于把你的语音转成文字，录音不会作为聊天语音长期保存。"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "./plugins/withAndroidCleartextTraffic",
+        {
+          "enabled": true
+        }
+      ]
+    ]
+  }
+}
