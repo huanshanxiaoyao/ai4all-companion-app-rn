@@ -20,6 +20,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE_STATE = ROOT / ".lark-research-workspace.json"
 MARKDOWN_STATE = ROOT / ".lark-markdown-sync.json"
+MIRROR_STATE = ROOT / ".lark-research-mirrors.json"
 
 ALLOWED_ACTIONS: Mapping[str, Set[str]] = {
     "base": {
@@ -68,6 +69,7 @@ ALLOWED_ACTIONS: Mapping[str, Set[str]] = {
         "+media-download",
     },
     "markdown": {
+        "+create",
         "+fetch",
         "+diff",
         "+patch",
@@ -156,6 +158,25 @@ def workspace_resources() -> Tuple[Dict[str, str], List[str]]:
     sensitive_values = list(resources.values())
     sensitive_values.extend(collect_sensitive_strings(workspace))
     sensitive_values.extend(collect_sensitive_strings(markdown))
+    if MIRROR_STATE.exists():
+        mirrors = load_json(MIRROR_STATE)
+        for section in ("folders", "files"):
+            entries = mirrors.get(section, {})
+            if not isinstance(entries, Mapping):
+                raise GatewayError(f"invalid {section} in {MIRROR_STATE.name}")
+            for key, entry in entries.items():
+                if not isinstance(entry, Mapping):
+                    raise GatewayError(f"invalid mirror entry: {key}")
+                alias = entry.get("alias")
+                token = entry.get("token")
+                if not isinstance(alias, str) or not alias.startswith("@research-"):
+                    raise GatewayError(f"invalid mirror alias: {key}")
+                if not isinstance(token, str) or not token.strip():
+                    raise GatewayError(f"invalid mirror token: {key}")
+                if alias in resources:
+                    raise GatewayError(f"duplicate research alias: {alias}")
+                resources[alias] = token.strip()
+        sensitive_values.extend(collect_sensitive_strings(mirrors))
     return resources, sensitive_values
 
 
@@ -294,9 +315,11 @@ def build_command(
         if action == "+update" and option_value(args, "--command") == "overwrite":
             raise GatewayError("full Docx overwrite is blocked; use a precise block update")
     elif service == "markdown":
-        if has_option(args, "--file-token"):
-            raise GatewayError("Markdown token is injected by the gateway")
-        args.extend(["--file-token", "@research-markdown"])
+        if action == "+create":
+            if has_option(args, "--file-token"):
+                raise GatewayError("markdown +create does not accept --file-token")
+        elif not has_option(args, "--file-token"):
+            args.extend(["--file-token", "@research-markdown"])
 
     validate_token_flags(args, resources)
     args = expand_aliases(args, resources)
@@ -324,9 +347,14 @@ def check_configuration() -> int:
     if shutil.which("lark-cli") is None:
         raise GatewayError("lark-cli is not installed")
     resources, _ = workspace_resources()
-    if len(resources) != 4:
+    required = {"@research-base", "@research-report", "@research-folder", "@research-markdown"}
+    if not required.issubset(resources):
         raise GatewayError("research resource configuration is incomplete")
-    print("OK: lark-cli and 4 research resources are configured; values are redacted")
+    mirror_count = len(resources) - len(required)
+    print(
+        "OK: lark-cli and 4 core research resources are configured; "
+        f"{mirror_count} mirror aliases loaded; values are redacted"
+    )
     return 0
 
 

@@ -14,6 +14,7 @@ __pycache__/
 .env.*
 !.env.example
 .lark-markdown-sync.json
+.lark-research-mirrors.json
 .lark-research-workspace.json
 .research-sync-tmp/
 .playwright-cli/
