@@ -9,6 +9,7 @@ reviewed set of non-destructive research operations.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import shutil
 import subprocess
@@ -133,6 +134,40 @@ def load_json(path: Path) -> Dict[str, Any]:
     if not isinstance(data, dict):
         raise GatewayError(f"invalid state object: {path.name}")
     return data
+
+
+def save_json_atomic(path: Path, data: Mapping[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(data, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+        os.replace(temporary, path)
+    except OSError as exc:
+        raise GatewayError(f"cannot update state file: {path.name}") from exc
+
+
+def local_markdown_path(raw: str) -> Tuple[Path, str]:
+    path = Path(raw)
+    if path.is_absolute():
+        resolved = path.resolve(strict=False)
+    else:
+        resolved = (ROOT / path).resolve(strict=False)
+    if not is_within(resolved, ROOT.resolve()):
+        raise GatewayError("markdown mirror must be inside the repository")
+    if resolved.suffix.lower() != ".md":
+        raise GatewayError("markdown mirror path must end in .md")
+    if not resolved.is_file():
+        raise GatewayError(f"markdown mirror does not exist: {raw}")
+    return resolved, resolved.relative_to(ROOT.resolve()).as_posix()
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def nested_string(data: Mapping[str, Any], *keys: str) -> str:
@@ -335,6 +370,147 @@ def redact(text: str, sensitive_values: Iterable[str]) -> str:
     return redacted
 
 
+def parse_cli_json(process: subprocess.CompletedProcess[str], sensitive_values: Iterable[str]) -> Dict[str, Any]:
+    if process.returncode != 0:
+        if process.stdout:
+            sys.stdout.write(redact(process.stdout, sensitive_values))
+        if process.stderr:
+            sys.stderr.write(redact(process.stderr, sensitive_values))
+        raise GatewayError(f"lark-cli exited with status {process.returncode}")
+    try:
+        payload = json.loads(process.stdout)
+    except json.JSONDecodeError as exc:
+        raise GatewayError("lark-cli returned invalid JSON") from exc
+    if not isinstance(payload, dict) or payload.get("ok") is not True:
+        raise GatewayError("lark-cli did not return a successful result")
+    return payload
+
+
+def create_markdown_mirror(argv: Sequence[str]) -> int:
+    if len(argv) not in {2, 3}:
+        raise GatewayError(
+            "usage: --create-markdown-mirror <repo-relative.md> <@research-alias> [@research-folder-alias]"
+        )
+    path, relative_path = local_markdown_path(argv[0])
+    alias = argv[1]
+    folder_alias = argv[2] if len(argv) == 3 else "@research-folder"
+    if not alias.startswith("@research-"):
+        raise GatewayError("markdown mirror alias must start with @research-")
+
+    resources, sensitive_values = workspace_resources()
+    if alias in resources:
+        raise GatewayError(f"markdown mirror alias already exists: {alias}")
+    if folder_alias not in resources:
+        raise GatewayError(f"unknown research folder alias: {folder_alias}")
+
+    mirrors = load_json(MIRROR_STATE)
+    files = mirrors.get("files")
+    if not isinstance(files, dict):
+        raise GatewayError(f"invalid files in {MIRROR_STATE.name}")
+    if relative_path in files:
+        raise GatewayError(f"markdown mirror path already exists: {relative_path}")
+
+    process = subprocess.run(
+        [
+            "lark-cli",
+            "markdown",
+            "+create",
+            "--folder-token",
+            resources[folder_alias],
+            "--file",
+            relative_path,
+            "--as",
+            "user",
+        ],
+        cwd=str(ROOT),
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    payload = parse_cli_json(process, sensitive_values)
+    data = payload.get("data")
+    token = data.get("file_token") if isinstance(data, Mapping) else None
+    if not isinstance(token, str) or not token:
+        raise GatewayError("markdown create result is missing file token")
+
+    files[relative_path] = {
+        "alias": alias,
+        "token": token,
+        "remote_name": path.name,
+        "folder_alias": folder_alias,
+        "last_synced_sha256": file_sha256(path),
+        "last_synced_size_bytes": path.stat().st_size,
+        "last_synced_version": str(data.get("version", "")),
+    }
+    save_json_atomic(MIRROR_STATE, mirrors)
+    print(f"OK: created and registered Markdown mirror {relative_path} as {alias}; resource values redacted")
+    return 0
+
+
+def sync_markdown_mirror(argv: Sequence[str]) -> int:
+    if len(argv) != 1:
+        raise GatewayError("usage: --sync-markdown-mirror <repo-relative.md>")
+    path, relative_path = local_markdown_path(argv[0])
+    mirrors = load_json(MIRROR_STATE)
+    files = mirrors.get("files")
+    if not isinstance(files, dict):
+        raise GatewayError(f"invalid files in {MIRROR_STATE.name}")
+    entry = files.get(relative_path)
+    state_path = MIRROR_STATE
+    state_payload: Dict[str, Any] = mirrors
+    if not isinstance(entry, dict):
+        primary = load_json(MARKDOWN_STATE)
+        if primary.get("local_file") != relative_path:
+            raise GatewayError(f"markdown mirror is not registered: {relative_path}")
+        entry = primary
+        state_path = MARKDOWN_STATE
+        state_payload = primary
+    token = entry.get("token") or entry.get("file_token")
+    if not isinstance(token, str) or not token:
+        raise GatewayError(f"markdown mirror token is missing: {relative_path}")
+
+    _, sensitive_values = workspace_resources()
+    process = subprocess.run(
+        [
+            "lark-cli",
+            "markdown",
+            "+overwrite",
+            "--file-token",
+            token,
+            "--file",
+            relative_path,
+            "--as",
+            "user",
+        ],
+        cwd=str(ROOT),
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    payload = parse_cli_json(process, sensitive_values)
+    data = payload.get("data")
+    if not isinstance(data, Mapping):
+        raise GatewayError("markdown overwrite result is missing data")
+    version = data.get("version")
+    if not isinstance(version, str) or not version:
+        raise GatewayError("markdown overwrite result is missing version")
+
+    entry.update(
+        {
+            "last_synced_sha256": file_sha256(path),
+            "last_synced_size_bytes": path.stat().st_size,
+            "last_synced_version": version,
+        }
+    )
+    if state_path == MIRROR_STATE:
+        entry["remote_name"] = path.name
+    save_json_atomic(state_path, state_payload)
+    print(f"OK: synchronized Markdown mirror {relative_path}; version and resource values redacted")
+    return 0
+
+
 def print_policy() -> None:
     print("Allowed research gateway operations:")
     for service in sorted(ALLOWED_ACTIONS):
@@ -360,13 +536,22 @@ def check_configuration() -> int:
 
 def main(argv: Sequence[str]) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
-        print("Usage: lark_research.py --check | --policy | <base|docs|markdown|drive> <+action> [args...]")
+        print(
+            "Usage: lark_research.py --check | --policy | "
+            "--create-markdown-mirror <path> <alias> [folder-alias] | "
+            "--sync-markdown-mirror <path> | "
+            "<base|docs|markdown|drive> <+action> [args...]"
+        )
         return 0
     if argv[0] == "--policy":
         print_policy()
         return 0
     if argv[0] == "--check":
         return check_configuration()
+    if argv[0] == "--create-markdown-mirror":
+        return create_markdown_mirror(argv[1:])
+    if argv[0] == "--sync-markdown-mirror":
+        return sync_markdown_mirror(argv[1:])
     if len(argv) < 2:
         raise GatewayError("service and +action are required")
 
