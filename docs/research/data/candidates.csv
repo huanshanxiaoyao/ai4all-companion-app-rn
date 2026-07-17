@@ -1,0 +1,22 @@
+候选ID,产品名,平台,平台ID或URL,发现来源,初步活跃信号,代表路径,状态,发现日期,备注
+CAN-001,Dot - Living History,iOS,https://apps.apple.com/us/app/dot-living-history/id6450012673,Paradot App Store 相似产品,美国区约2.9K评分,长期个人AI/生活记录,待规模核验,2026-07-17,开发者 New Computer Inc；需要核验 Android/Web 和关系连续性
+CAN-002,Heeyo,iOS,https://apps.apple.com/us/app/heeyo-chat-with-your-ai-friend/id6475795488,Paradot App Store 相似产品,美国区约727评分,儿童AI朋友/学习与创作,待规模核验,2026-07-17,儿童定位需要单独安全与家长控制框架
+CAN-003,Mimico,iOS,https://apps.apple.com/us/app/mimico-your-ai-friends/id6448932327,Paradot App Store 相似产品,美国区约337评分,角色聊天/AI朋友,待规模核验,2026-07-17,需核验开发者、Android Package 和当前商业化
+CAN-004,ChatJoy,iOS,https://apps.apple.com/us/app/chatjoy-ai-friend-chat/id6472236626,Paradot App Store 相似产品,美国区约414评分,AI角色/长期朋友,待规模核验,2026-07-17,需核验 Android 规模、记忆和关系机制
+CAN-005,Life - AI Friends by Born,iOS,https://apps.apple.com/us/app/life-ai-friends-by-born/id6503385409,Friend App Store 相似产品,美国区约670评分,多对象 AI 朋友/关系聊天,待规模核验,2026-07-17,需核验 Android/Web、记忆和成人内容边界
+CAN-006,Rosebud – AI Journal app,iOS,https://apps.apple.com/us/app/rosebud-ai-journal-app/id6450916155,Ash App Store 相似产品,美国区约19K评分,AI 日记/自我反思伙伴,待规模核验,2026-07-17,高评分量邻接产品；需判断聊天关系和长期记忆是否达到陪伴门槛
+CAN-007,よりそいAI,iOS,https://apps.apple.com/us/app/%E3%82%88%E3%82%8A%E3%81%9D%E3%81%84ai/id6744373552,Awarefy App Store 相似产品,美国区仅4评分但当前条目可用,日语情绪支持/倾听伙伴,待规模核验,2026-07-17,低活跃种子；优先从日本区评分和 Android 对应项复核
+CAN-008,Shadow Work - Mindberg,Android,com.mindberg.mindberg,Ash Google Play 相似应用,相似应用卡显示4.3分,阴影工作/引导式自我反思,待规模核验,2026-07-17,邻接心理支持产品；需核验 AI 对话占比和安装量
+CAN-009,Untangle: CBT Companion,Android,co.swasth.cbtcompanion,Ash Google Play 相似应用,相似应用卡显示4.4分,CBT 对话/练习伙伴,待规模核验,2026-07-17,需核验安装量、是否仍活跃和关系连续性
+CAN-010,AI Journal Notebook - Reflectr,Android,net.dailylabs.daily_app,Ash Google Play 相似应用,相似应用卡显示4.0分,AI 日记/反思反馈,待规模核验,2026-07-17,邻接产品；需核验聊天、主动触达和长期记忆
+CAN-011,Breeze: Self-Discovery Buddy,Android,com.basenjiapps.breeze,Awarefy Google Play 相似应用,相似应用卡显示4.2分,自我发现/情绪支持伙伴,待规模核验,2026-07-17,需核验 AI 对话占比、安装量和订阅结构
+CAN-012,Daybloom: AI Self-Care Journal,Android,org.maysnow.gratitudediary,Awarefy Google Play 相似应用,相似应用卡显示4.9分,AI 自我照护日记,待规模核验,2026-07-17,邻接产品；需核验聊天关系、规模和开发者
+CAN-013,"Routine Planner, Habit Tracker",Android,com.alt.goodmorning,Awarefy Google Play 相似应用,相似应用卡显示4.5分,习惯与主动提醒邻接机制,待机制筛选,2026-07-17,非典型陪伴；保留用于核验主动触达和仪式设计
+CAN-014,BIMOBIMO,Android,com.beemo.ai.flutter_beemo,"Talkie、zeta 与 MiraiMind Google Play 相似应用",相似应用卡显示4.6分,角色聊天/AI 朋友,待规模核验,2026-07-17,三个重点角色产品共同推荐；优先核验安装量、开发者、iOS/Web 和记忆机制
+CAN-015,Chub AI,iOS,https://apps.apple.com/us/app/chub-ai/id6745594065,Talkie App Store 相似产品,美国区约1.1K评分,开放角色聊天/角色创作,待规模核验,2026-07-17,需核验 Android/Web、成人内容边界和角色生态
+CAN-016,Luvr AI Companion,iOS,https://apps.apple.com/us/search?term=Luvr%20AI%20Companion,zeta App Store 相似产品,美国区约132评分,AI 伴侣/关系聊天,待规模核验,2026-07-17,需定位直接 App ID、Android 对应项和记忆机制
+CAN-017,Lifelike: AI Friends,iOS,https://apps.apple.com/us/search?term=Lifelike%20AI%20Friends,zeta App Store 相似产品,美国区约9.4K评分,多 AI 朋友/角色聊天,待规模核验,2026-07-17,高评分量候选；优先核验开发者、Android 规模和关系连续性
+CAN-018,Kiara - AI Companion,iOS,https://apps.apple.com/us/search?term=Kiara%20AI%20Companion,zeta App Store 相似产品,美国区约185评分,AI 伴侣/角色关系,待规模核验,2026-07-17,需定位直接 App ID、Android 对应项和当前活跃状态
+CAN-019,NEKOFI,iOS,https://apps.apple.com/us/search?term=NEKOFI,MiraiMind App Store 相似产品,美国区约1.2K评分,动漫角色/AI 聊天,待规模核验,2026-07-17,需核验 Android、开发者、记忆和成人内容边界
+CAN-020,Saen-D: AI Companion,Android,com.bnl.saend,Caveduck Google Play 相似应用,相似应用卡显示2.7分,区域 AI 伴侣/关系聊天,待规模核验,2026-07-17,需核验安装量、泰语/区域市场、开发者和长期关系机制
+CAN-021,status - sims but social media,Android,link.socialai.app,Aspect Google Play 相似应用,"Google Play 显示 1M+ 下载、约 4.2 分与 434K 评论",AI-only 社交模拟/粉丝与发帖,待机制筛选,2026-07-17,"WishRoll 产品；公开规模已达门槛，优先核验人格网络、多人模式、能量订阅、账号连续性与数据安全"
