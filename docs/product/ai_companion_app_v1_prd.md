@@ -6,6 +6,9 @@
 > 实现校准日期：2026-07-14
 > 适用客户端：React Native iOS / Android
 > 产品名称：朝夕相伴（AI4ALL Companion）
+> 文档角色：已实现单 Agent 工程基线；不是当前目标产品定义
+> 上位产品理念：[朝夕相伴产品宪章](./ai_companion_product_charter.md)
+> 当前目标产品：[私人平行世界产品形态 PRD](./ai_companion_universe_prd.md)
 
 ## 0. 结论摘要
 

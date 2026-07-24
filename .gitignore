@@ -6,6 +6,7 @@ node_modules/
 dist/
 web-build/
 coverage/
+output/
 __pycache__/
 *.py[cod]
 .DS_Store
@@ -18,6 +19,7 @@ __pycache__/
 .lark-research-workspace.json
 .research-sync-tmp/
 .playwright-cli/
+.codex/
 
 # Generated native build artifacts remain local until the prebuild config is frozen.
 ios/

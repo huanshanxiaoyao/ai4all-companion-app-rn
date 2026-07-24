@@ -5,6 +5,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { ApiError, api } from '@/api/client';
 import { BRAND } from '@/config';
+import { CompanionPrototype } from '@/prototype/CompanionPrototype';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
@@ -18,6 +19,14 @@ type AppSession = {
 };
 
 export default function App() {
+  if (process.env.EXPO_PUBLIC_UI_PREVIEW === '1') {
+    return <CompanionPrototype />;
+  }
+
+  return <LiveApp />;
+}
+
+function LiveApp() {
   const [route, setRoute] = useState<'boot' | 'login' | 'chat' | 'settings'>('boot');
   const [session, setSession] = useState<AppSession | null>(null);
 
